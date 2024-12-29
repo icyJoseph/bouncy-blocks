@@ -7,9 +7,50 @@ use web_sys::js_sys::{Int32Array, Uint8ClampedArray};
 use wasm_bindgen::prelude::*;
 use web_sys::console;
 
-#[wasm_bindgen]
-extern "C" {
-    fn alert(s: &str);
+struct Draw {
+    x: usize,
+    y: usize,
+    size: usize,
+    color: (u8, u8, u8),
+}
+
+impl Draw {
+    fn new(desc: &[usize]) -> Self {
+        let x = desc[1];
+        let y = desc[2];
+        let size = desc[5];
+
+        let r = desc[6] as u8;
+        let g = desc[7] as u8;
+        let b = desc[8] as u8;
+
+        Draw {
+            x,
+            y,
+            size,
+            color: (r, g, b),
+        }
+    }
+
+    fn paint(&self, pixels: &mut [u8], width: usize, height: usize) {
+        for x in self.x..self.x + self.size {
+            for y in self.y..self.y + self.size {
+                let in_x = 0 <= x && x < width;
+                let in_y = 0 <= y && y < height;
+
+                let index = (y * width + x) * 4;
+
+                if in_x && in_y {
+                    let (r, g, b) = self.color;
+
+                    pixels[index] = r;
+                    pixels[index + 1] = g;
+                    pixels[index + 2] = b;
+                    pixels[index + 3] = 255;
+                }
+            }
+        }
+    }
 }
 
 #[wasm_bindgen]
@@ -19,35 +60,63 @@ pub fn paint(state: &[usize], width: usize, height: usize) -> Uint8ClampedArray 
     let entries = state.chunks(9);
 
     for entry in entries {
-        let x0 = entry[0];
-        let y0 = entry[1];
-        // let dx = entry[2];
-        // let dy = entry[3];
-        let size = entry[4];
+        let draw = Draw::new(entry);
 
-        let r = entry[5];
-        let g = entry[6];
-        let b = entry[7];
-        let id = entry[8];
-
-        for x in x0..x0 + size {
-            for y in y0..y0 + size {
-                let in_x = 0 <= x && x < width;
-                let in_y = 0 <= y && y < height;
-
-                let index = (y * width + x) * 4;
-
-                if in_x && in_y {
-                    pixels[index] = r as u8;
-                    pixels[index + 1] = g as u8;
-                    pixels[index + 2] = b as u8;
-                    pixels[index + 3] = 255;
-                }
-            }
-        }
+        draw.paint(&mut pixels, width, height);
     }
 
     Uint8ClampedArray::from(&pixels[..])
+}
+
+struct Entry {
+    x: i32,
+    y: i32,
+    dx: i32,
+    dy: i32,
+    size: i32,
+}
+
+impl Entry {
+    fn new(state: &[i32]) -> Self {
+        let x = state[1];
+        let y = state[2];
+        let dx = state[3];
+        let dy = state[4];
+        let size = state[5];
+
+        Entry { x, y, dx, dy, size }
+    }
+
+    fn update(&mut self, width: i32, height: i32, gravity: i32) {
+        let x_bound = width - 1 - self.size;
+        let y_bound = height - 1 - self.size;
+
+        self.x = min(x_bound, max(0, self.x.wrapping_add(self.dx)));
+        self.y = min(y_bound, max(0, self.y.wrapping_add(self.dy)));
+
+        let x_edge = self.x + self.size + 1;
+
+        self.dx = if x_edge == width || self.x == 0 {
+            -self.dx
+        } else {
+            self.dx
+        };
+
+        let y_edge = self.y + self.size + 1;
+
+        self.dy = if y_edge == height {
+            -(self.dy.abs() - self.dy.abs() / 2)
+        } else {
+            self.dy + gravity
+        };
+    }
+
+    fn apply(&self, next: &mut [i32]) {
+        next[1] = self.x;
+        next[2] = self.y;
+        next[3] = self.dx;
+        next[4] = self.dy;
+    }
 }
 
 #[wasm_bindgen]
@@ -55,24 +124,14 @@ pub fn update(state: &[i32], width: i32, height: i32, gravity: i32) -> Int32Arra
     let mut next: Vec<i32> = Vec::from(state);
 
     for i in 0..state.len() / 9 {
-        let x0 = state[i * 9];
-        let y0 = state[i * 9 + 1];
-        let dx = state[i * 9 + 2];
-        let dy = state[i * 9 + 3];
-        let size = state[i * 9 + 4];
+        let from = i * 9;
+        let to = from + 9;
 
-        next[i * 9] = min(width - 1 - size, max(0, x0.wrapping_add(dx)));
-        next[i * 9 + 1] = min(height - 1 - size, max(0, y0.wrapping_add(dy)));
-        next[i * 9 + 2] = if next[i * 9] + size + 1 == width || next[i * 9] == 0 {
-            -dx
-        } else {
-            dx
-        };
-        next[i * 9 + 3] = if next[i * 9 + 1] + size + 1 == height {
-            -(dy.abs() - dy.abs() / 2)
-        } else {
-            dy + gravity
-        };
+        let mut entry = Entry::new(&next[from..to]);
+
+        entry.update(width, height, gravity);
+
+        entry.apply(&mut next[from..to]);
     }
 
     Int32Array::from(&next[..])
