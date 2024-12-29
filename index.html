@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title></title>
+    <link href="css/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <canvas id="root"></canvas>
+
+    <script type="module">
+      import init, { paint, update } from "./pkg/hello_wasm.js";
+
+      const FPS = 30;
+      const fpsTime = 1000 / FPS; // ms
+
+      const gravity = 1; // pixel/frame
+
+      const canvas = document.getElementById("root");
+
+      const { width, height } = adjustCanvas();
+
+      let state = [
+        [0, 0, 8, 1, 100, 255, 0, 0, 0], // 0th
+        [0, 0, 4, 1, 200, 0, 255, 0, 1], // 1st
+        [0, 0, 1, 1, 300, 0, 0, 255, 2], // 1st
+      ]
+        .reverse()
+        .flat();
+
+      init().then(() => {
+        const context = canvas.getContext("2d");
+
+        function loop(prev = 0) {
+          requestAnimationFrame((timestamp) => {
+            if (timestamp - prev < fpsTime) return loop(prev);
+
+            const { width, height } = adjustCanvas();
+
+            const pixels = paint(state, width, height);
+
+            state = update(state, width, height, gravity);
+
+            const imageData = new ImageData(pixels, width, height);
+
+            context.putImageData(imageData, 0, 0);
+
+            applyBackground(context, width, height);
+
+            return loop(timestamp);
+          });
+        }
+
+        loop();
+      });
+
+      function adjustCanvas() {
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+
+        if (canvas.width !== width) {
+          canvas.width = width;
+        }
+
+        if (canvas.height !== height) {
+          canvas.height = height;
+        }
+        // return { width: 640, height: 480 };
+
+        return { width: canvas.width, height: canvas.height };
+      }
+
+      function applyBackground(context, width, height) {
+        context.globalCompositeOperation = "destination-over";
+        context.fillStyle = "rgb(0,0,0,255)";
+        context.fillRect(0, 0, width, height);
+      }
+    </script>
+  </body>
+</html>
