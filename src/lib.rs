@@ -35,18 +35,24 @@ impl Draw {
     fn paint(&self, pixels: &mut [u8], width: usize, height: usize) {
         for x in self.x..self.x + self.size {
             for y in self.y..self.y + self.size {
-                let in_x = 0 <= x && x < width;
-                let in_y = 0 <= y && y < height;
-
                 let index = (y * width + x) * 4;
 
-                if in_x && in_y {
-                    let (r, g, b) = self.color;
+                let (r, g, b) = self.color;
 
-                    pixels[index] = r;
-                    pixels[index + 1] = g;
-                    pixels[index + 2] = b;
-                    pixels[index + 3] = 255;
+                if let Some(value) = pixels.get_mut(index) {
+                    *value = r;
+                }
+
+                if let Some(value) = pixels.get_mut(index + 1) {
+                    *value = g;
+                }
+
+                if let Some(value) = pixels.get_mut(index + 2) {
+                    *value = b;
+                }
+
+                if let Some(value) = pixels.get_mut(index + 3) {
+                    *value = 255;
                 }
             }
         }
