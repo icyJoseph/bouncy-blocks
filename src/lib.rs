@@ -106,6 +106,8 @@ impl Entry {
 
         self.dy = if y_edge == height {
             -(self.dy.abs() - self.dy.abs() / 2)
+        } else if self.y == 0 {
+            -self.dy
         } else {
             self.dy + gravity
         };
