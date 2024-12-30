@@ -103,8 +103,8 @@ impl Entry {
         let x_bound = width - 1 - self.size;
         let y_bound = height - 1 - self.size;
 
-        self.x = min(x_bound, max(0, self.x.wrapping_add(self.dx)));
-        self.y = min(y_bound, max(0, self.y.wrapping_add(self.dy)));
+        self.x = min(x_bound, self.x + self.dx);
+        self.y = min(y_bound, self.y + self.dy);
 
         let x_edge = self.x + self.size + 1;
 
