@@ -1,5 +1,5 @@
 [package]
-name = "hello-wasm"
+name = "bouncy-blocks"
 version = "0.1.0"
 authors = ["Joseph Chamochumbi <sephxd1234@gmail.com>"]
 edition = "2018"
