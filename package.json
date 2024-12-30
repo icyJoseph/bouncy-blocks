@@ -7,7 +7,7 @@
   "scripts": {
     "build": "wasm-pack build --target web --out-dir out/pkg && cp index.html out && cp -r css out",
     "dev": "wasm-pack build --target web --dev && npx serve -s ./ -l 1337",
-    "deploy": "echo unimplemented"
+    "deploy": "surge ./out https://excited-sign.surge.sh"
   },
   "devDependencies": {
     "serve": "14.2.4"
