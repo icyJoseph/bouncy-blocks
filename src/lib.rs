@@ -33,8 +33,14 @@ impl Draw {
     }
 
     fn paint(&self, pixels: &mut [u8], width: usize, height: usize) {
-        for x in self.x..self.x + self.size {
-            for y in self.y..self.y + self.size {
+        let lower_x = self.x;
+        let upper_x = min(lower_x + self.size, width);
+
+        for x in lower_x..upper_x {
+            let lower_y = self.y;
+            let upper_y = min(lower_y + self.size, height);
+
+            for y in lower_y..upper_y {
                 let index = (y * width + x) * 4;
 
                 let (r, g, b) = self.color;
