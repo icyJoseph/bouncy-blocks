@@ -14,6 +14,10 @@
       const fpsTime = 1000 / FPS; // ms
 
       const gravity = { current: 1 }; // pixel/frame
+
+      const seen = new Set();
+
+      let state = new Int32Array(9 * 1000);
     </script>
 
     <script type="module">
@@ -22,14 +26,6 @@
       const canvas = document.getElementById("root");
 
       const { width, height } = adjustCanvas();
-
-      let state = [
-        [0, 0, 0, 8, 1, 100, 255, 0, 0], // 0th
-        [1, 0, 10, 4, 1, 200, 0, 255, 0], // 1st
-        [2, 0, 20, 1, 1, 300, 0, 0, 255], // 2nd
-      ]
-        .reverse()
-        .flat();
 
       init().then(() => {
         const context = canvas.getContext("2d");
@@ -127,6 +123,35 @@
         .catch((reason) => {
           console.log(reason);
         });
+    </script>
+
+    <script type="module">
+      function getRandomInt(min, max) {
+        const minCeiled = Math.ceil(min);
+        const maxFloored = Math.floor(max);
+        return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+      }
+
+      window.addEventListener("click", (event) => {
+        const size = 100;
+
+        const x = event.clientX;
+        const y = event.clientY;
+
+        const dx = getRandomInt(-2, 3);
+        const dy = 0;
+
+        const r = Math.floor(256 * Math.random());
+        const g = Math.floor(256 * Math.random());
+        const b = Math.floor(256 * Math.random());
+
+        const id = seen.size;
+        const block = [id, x, y, dx, dy, size, r, g, b];
+
+        state.set(block, id * 9);
+
+        seen.add(block);
+      });
     </script>
   </body>
 </html>
