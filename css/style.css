@@ -19,3 +19,15 @@ canvas {
 *::before {
   box-sizing: border-box;
 }
+
+.call-to-action {
+  position: absolute;
+  top: 1rem;
+  left: 0;
+  right: 0;
+  text-align: center;
+  margin: 0 auto;
+  color: white;
+  text-transform: capitalize;
+  font-family: monospace;
+}
