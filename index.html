@@ -13,7 +13,7 @@
 
     <script>
       const FPS = 60;
-      const fpsTime = 1000 / FPS; // ms
+      const fpsTime = 1000 / FPS;
 
       function loopAnimation(callback, prev = 0) {
         requestAnimationFrame((timestamp) => {
@@ -27,7 +27,7 @@
         });
       }
 
-      const gravity = { current: 1 }; // pixel/frame
+      const gravity = { current: 1 };
 
       const seen = new Set();
 
@@ -107,11 +107,11 @@
     </script>
 
     <script type="module">
-      function getRandomInt(min, max) {
-        const minCeiled = Math.ceil(min);
-        const maxFloored = Math.floor(max);
+      function getRandomInt(from, to) {
+        const min = Math.ceil(from);
+        const max = Math.floor(to);
 
-        return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
+        return Math.floor(Math.random() * (max - min) + min);
       }
 
       document.body.addEventListener("click", (event) => {
