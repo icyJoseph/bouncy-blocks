@@ -88,9 +88,9 @@
           analyzer.fftSize = 256;
           analyzer.minDecibels = -60;
 
-          loopAnimation(() => {
-            const data = new Uint8Array(analyzer.frequencyBinCount);
+          const data = new Uint8Array(analyzer.frequencyBinCount);
 
+          loopAnimation(() => {
             analyzer.getByteFrequencyData(data);
 
             const accPower = data.reduce((acc, curr) => acc + curr / 255, 0);
