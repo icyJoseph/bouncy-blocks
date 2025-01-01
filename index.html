@@ -31,7 +31,7 @@
 
       const seen = new Set();
 
-      let state = new Int32Array(9 * 1000);
+      const state = new Int32Array(9 * 500);
     </script>
 
     <script type="module">
@@ -46,7 +46,7 @@
 
           const pixels = paint(state, width, height);
 
-          state = update(state, width, height, gravity.current);
+          update(state, width, height, gravity.current);
 
           const imageData = new ImageData(pixels, width, height);
 

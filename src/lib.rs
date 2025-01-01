@@ -133,19 +133,15 @@ impl Entry {
 }
 
 #[wasm_bindgen]
-pub fn update(state: &[i32], width: i32, height: i32, gravity: i32) -> Int32Array {
-    let mut next: Vec<i32> = Vec::from(state);
-
+pub fn update(state: &mut [i32], width: i32, height: i32, gravity: i32) {
     for i in 0..state.len() / 9 {
         let from = i * 9;
         let to = from + 9;
 
-        let mut entry = Entry::new(&next[from..to]);
+        let mut entry = Entry::new(&state[from..to]);
 
         entry.update(width, height, gravity);
 
-        entry.apply(&mut next[from..to]);
+        entry.apply(&mut state[from..to]);
     }
-
-    Int32Array::from(&next[..])
 }
