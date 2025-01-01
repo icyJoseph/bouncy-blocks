@@ -69,10 +69,6 @@ impl Draw {
 pub fn paint(state: &[usize], width: usize, height: usize) -> Uint8ClampedArray {
     let mut pixels: Vec<u8> = vec![0; width * height * 4];
 
-    // for alpha in 0..pixels.len() / 4 {
-    //     pixels[4 * alpha + 3] = 255;
-    // }
-
     let entries = state.chunks(9);
 
     for entry in entries {

@@ -46,8 +46,6 @@
 
             context.putImageData(imageData, 0, 0);
 
-            applyBackground(context, width, height);
-
             return loop(timestamp);
           });
         }
@@ -68,12 +66,6 @@
         }
 
         return { width: canvas.width, height: canvas.height };
-      }
-
-      function applyBackground(context, width, height) {
-        context.globalCompositeOperation = "destination-over";
-        context.fillStyle = "rgb(0,0,0,255)";
-        context.fillRect(0, 0, width, height);
       }
     </script>
 
@@ -125,6 +117,7 @@
       function getRandomInt(min, max) {
         const minCeiled = Math.ceil(min);
         const maxFloored = Math.floor(max);
+
         return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
       }
 
