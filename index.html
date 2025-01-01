@@ -38,8 +38,7 @@
       import init, { paint, update } from "./pkg/bouncy_blocks.js";
 
       const canvas = document.getElementById("root");
-
-      const { width, height } = adjustCanvas();
+      const context = canvas.getContext("2d");
 
       init().then(() => {
         loopAnimation(() => {
@@ -55,19 +54,19 @@
         });
       });
 
-      function adjustCanvas() {
-        const width = canvas.clientWidth;
-        const height = canvas.clientHeight;
+      function adjustCanvas(target) {
+        const width = target.clientWidth;
+        const height = target.clientHeight;
 
-        if (canvas.width !== width) {
-          canvas.width = width;
+        if (target.width !== width) {
+          target.width = width;
         }
 
-        if (canvas.height !== height) {
-          canvas.height = height;
+        if (target.height !== height) {
+          target.height = height;
         }
 
-        return { width: canvas.width, height: canvas.height };
+        return { width: target.width, height: target.height };
       }
     </script>
 
