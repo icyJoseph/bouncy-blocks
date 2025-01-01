@@ -32,6 +32,8 @@
       const seen = new Set();
 
       const state = new Int32Array(9 * 500);
+
+      let pixels = { current: null };
     </script>
 
     <script type="module">
@@ -44,13 +46,15 @@
         loopAnimation(() => {
           const { width, height } = adjustCanvas(canvas);
 
-          const pixels = paint(state, width, height);
+          pixels.current = paint(state, width, height);
 
           update(state, width, height, gravity.current);
 
-          const imageData = new ImageData(pixels, width, height);
+          const imageData = new ImageData(pixels.current, width, height);
 
           context.putImageData(imageData, 0, 0);
+
+          pixels.current = null;
         });
       });
 
