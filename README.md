@@ -6,6 +6,6 @@ Additionally, the Web Audio API is used to capture noise, and based on threshold
 
 ## TODO:
 
-- [ ] Add more blocks on click
+- [x] Add more blocks on click
 - [ ] Move more logic into WASM
 - [ ] Perhaps use smaller blocks, and enable collisions between them
