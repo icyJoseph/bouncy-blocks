@@ -15,6 +15,18 @@
       const FPS = 60;
       const fpsTime = 1000 / FPS; // ms
 
+      function loopAnimation(callback, prev = 0) {
+        requestAnimationFrame((timestamp) => {
+          if (timestamp - prev < fpsTime) {
+            return loopAnimation(callback, prev);
+          }
+
+          callback();
+
+          return loopAnimation(callback, timestamp);
+        });
+      }
+
       const gravity = { current: 1 }; // pixel/frame
 
       const seen = new Set();
@@ -30,27 +42,17 @@
       const { width, height } = adjustCanvas();
 
       init().then(() => {
-        const context = canvas.getContext("2d");
+        loopAnimation(() => {
+          const { width, height } = adjustCanvas(canvas);
 
-        function loop(prev = 0) {
-          requestAnimationFrame((timestamp) => {
-            if (timestamp - prev < fpsTime) return loop(prev);
+          const pixels = paint(state, width, height);
 
-            const { width, height } = adjustCanvas();
+          state = update(state, width, height, gravity.current);
 
-            const pixels = paint(state, width, height);
+          const imageData = new ImageData(pixels, width, height);
 
-            state = update(state, width, height, gravity.current);
-
-            const imageData = new ImageData(pixels, width, height);
-
-            context.putImageData(imageData, 0, 0);
-
-            return loop(timestamp);
-          });
-        }
-
-        loop();
+          context.putImageData(imageData, 0, 0);
+        });
       });
 
       function adjustCanvas() {
@@ -80,33 +82,25 @@
 
           source.connect(analyzer);
 
-          function collect(prev = 0) {
-            requestAnimationFrame((timestamp) => {
-              if (timestamp - prev < fpsTime * 2) return collect(prev);
+          analyzer.fftSize = 256;
+          analyzer.minDecibels = -60;
 
-              analyzer.fftSize = 256;
-              analyzer.minDecibels = -60;
+          loopAnimation(() => {
+            const data = new Uint8Array(analyzer.frequencyBinCount);
 
-              const data = new Uint8Array(analyzer.frequencyBinCount);
+            analyzer.getByteFrequencyData(data);
 
-              analyzer.getByteFrequencyData(data);
+            const accPower = data.reduce((acc, curr) => acc + curr / 255, 0);
 
-              const accPower = data.reduce((acc, curr) => acc + curr / 255, 0);
-
-              if (accPower > 5) {
-                gravity.current = Math.max(-10, gravity.current - 1);
-              } else if (gravity.current < 1) {
-                gravity.current = Math.min(
-                  1,
-                  Math.ceil((gravity.current + 1) / 2),
-                );
-              }
-
-              return collect(timestamp);
-            });
-          }
-
-          collect();
+            if (accPower > 5) {
+              gravity.current = Math.max(-10, gravity.current - 1);
+            } else if (gravity.current < 1) {
+              gravity.current = Math.min(
+                1,
+                Math.ceil((gravity.current + 1) / 2),
+              );
+            }
+          });
         })
         .catch((reason) => {
           console.log(reason);
