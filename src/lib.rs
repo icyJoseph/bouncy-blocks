@@ -2,7 +2,7 @@ mod utils;
 
 use std::cmp::{max, min};
 
-use web_sys::js_sys::{Int32Array, Uint8ClampedArray};
+use web_sys::js_sys::Uint8ClampedArray;
 
 use wasm_bindgen::prelude::*;
 
