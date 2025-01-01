@@ -137,9 +137,9 @@
         const dx = getRandomInt(-2, 3);
         const dy = 0;
 
-        const r = Math.floor(256 * Math.random());
-        const g = Math.floor(256 * Math.random());
-        const b = Math.floor(256 * Math.random());
+        const r = getRandomInt(0, 256);
+        const g = getRandomInt(0, 256);
+        const b = getRandomInt(0, 256);
 
         const id = seen.size;
         const block = [id, x, y, dx, dy, size, r, g, b];
