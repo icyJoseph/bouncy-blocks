@@ -5,7 +5,7 @@
   "author": "Joseph Chamochumbi <sephxd1234@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "build": "wasm-pack build --target web --out-dir out/pkg && cp index.html out && cp -r css out",
+    "build": "wasm-pack build --target web --out-dir out/pkg --no-pack --release && cp index.html out && cp -r css out && rm out/pkg/.gitignore",
     "dev": "wasm-pack build --target web --dev && npx serve -s ./ -l 1337",
     "deploy": "surge ./out https://excited-sign.surge.sh"
   },

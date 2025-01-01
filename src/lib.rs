@@ -5,7 +5,6 @@ use std::cmp::{max, min};
 use web_sys::js_sys::{Int32Array, Uint8ClampedArray};
 
 use wasm_bindgen::prelude::*;
-use web_sys::console;
 
 struct Draw {
     x: usize,
