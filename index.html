@@ -121,7 +121,7 @@
         return Math.floor(Math.random() * (maxFloored - minCeiled) + minCeiled); // The maximum is exclusive and the minimum is inclusive
       }
 
-      window.addEventListener("click", (event) => {
+      document.body.addEventListener("click", (event) => {
         const size = 100;
 
         const x = event.clientX;

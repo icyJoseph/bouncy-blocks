@@ -6,6 +6,8 @@ body,
 
 body {
   margin: 0;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
 }
 
 canvas {
