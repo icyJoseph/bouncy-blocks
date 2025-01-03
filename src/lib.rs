@@ -96,7 +96,7 @@ pub fn clear(pixels: &mut [u8], state: &[usize], width: usize, height: usize) {
     }
 }
 
-struct Entry {
+struct Block {
     x: i32,
     y: i32,
     dx: i32,
@@ -104,7 +104,7 @@ struct Entry {
     size: i32,
 }
 
-impl Entry {
+impl Block {
     fn new(state: &[i32]) -> Self {
         let x = state[1];
         let y = state[2];
@@ -112,7 +112,7 @@ impl Entry {
         let dy = state[4];
         let size = state[5];
 
-        Entry { x, y, dx, dy, size }
+        Block { x, y, dx, dy, size }
     }
 
     fn update(&mut self, width: i32, height: i32, gravity: i32) {
@@ -155,7 +155,7 @@ pub fn update(state: &mut [i32], width: i32, height: i32, gravity: i32) {
         let from = i * 9;
         let to = from + 9;
 
-        let mut entry = Entry::new(&state[from..to]);
+        let mut entry = Block::new(&state[from..to]);
 
         entry.update(width, height, gravity);
 
