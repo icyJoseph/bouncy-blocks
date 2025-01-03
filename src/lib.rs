@@ -29,6 +29,14 @@ impl Entity {
         }
     }
 
+    fn change_color(&mut self, to: (u8, u8, u8)) -> (u8, u8, u8) {
+        let current = self.color;
+
+        self.color = to;
+
+        current
+    }
+
     fn paint(&self, pixels: &mut [u8], width: usize, height: usize) {
         let lower_x = self.x;
         let upper_x = min(lower_x + self.size, width);
@@ -60,36 +68,6 @@ impl Entity {
             }
         }
     }
-
-    fn clear(&self, pixels: &mut [u8], width: usize, height: usize) {
-        let lower_x = self.x;
-        let upper_x = min(lower_x + self.size, width);
-
-        for x in lower_x..upper_x {
-            let lower_y = self.y;
-            let upper_y = min(lower_y + self.size, height);
-
-            for y in lower_y..upper_y {
-                let index = (y * width + x) * 4;
-
-                if let Some(value) = pixels.get_mut(index) {
-                    *value = 0;
-                }
-
-                if let Some(value) = pixels.get_mut(index + 1) {
-                    *value = 0;
-                }
-
-                if let Some(value) = pixels.get_mut(index + 2) {
-                    *value = 0;
-                }
-
-                if let Some(value) = pixels.get_mut(index + 3) {
-                    *value = 0;
-                }
-            }
-        }
-    }
 }
 
 #[wasm_bindgen]
@@ -108,9 +86,13 @@ pub fn clear(pixels: &mut [u8], state: &[usize], width: usize, height: usize) {
     let entries = state.chunks(9);
 
     for entry in entries {
-        let entity = Entity::new(entry);
+        let mut entity = Entity::new(entry);
 
-        entity.clear(pixels, width, height);
+        let current = entity.change_color((0, 0, 0));
+
+        entity.paint(pixels, width, height);
+
+        entity.change_color(current);
     }
 }
 
