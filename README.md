@@ -9,3 +9,4 @@ Additionally, the Web Audio API is used to capture noise, and based on threshold
 - [x] Add more blocks on click
 - [ ] Move more logic into WASM
 - [ ] Perhaps use smaller blocks, and enable collisions between them
+- [ ] Gravity changes when power is accumulated
