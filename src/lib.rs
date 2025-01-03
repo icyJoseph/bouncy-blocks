@@ -2,18 +2,16 @@ mod utils;
 
 use std::cmp::{max, min};
 
-use web_sys::js_sys::Uint8ClampedArray;
-
 use wasm_bindgen::prelude::*;
 
-struct Draw {
+struct Entity {
     x: usize,
     y: usize,
     size: usize,
     color: (u8, u8, u8),
 }
 
-impl Draw {
+impl Entity {
     fn new(desc: &[usize]) -> Self {
         let x = desc[1];
         let y = desc[2];
@@ -23,7 +21,7 @@ impl Draw {
         let g = desc[7] as u8;
         let b = desc[8] as u8;
 
-        Draw {
+        Entity {
             x,
             y,
             size,
@@ -62,21 +60,58 @@ impl Draw {
             }
         }
     }
+
+    fn clear(&self, pixels: &mut [u8], width: usize, height: usize) {
+        let lower_x = self.x;
+        let upper_x = min(lower_x + self.size, width);
+
+        for x in lower_x..upper_x {
+            let lower_y = self.y;
+            let upper_y = min(lower_y + self.size, height);
+
+            for y in lower_y..upper_y {
+                let index = (y * width + x) * 4;
+
+                if let Some(value) = pixels.get_mut(index) {
+                    *value = 0;
+                }
+
+                if let Some(value) = pixels.get_mut(index + 1) {
+                    *value = 0;
+                }
+
+                if let Some(value) = pixels.get_mut(index + 2) {
+                    *value = 0;
+                }
+
+                if let Some(value) = pixels.get_mut(index + 3) {
+                    *value = 0;
+                }
+            }
+        }
+    }
 }
 
 #[wasm_bindgen]
-pub fn paint(state: &[usize], width: usize, height: usize) -> Uint8ClampedArray {
-    let mut pixels: Vec<u8> = vec![0; width * height * 4];
-
+pub fn paint(pixels: &mut [u8], state: &[usize], width: usize, height: usize) {
     let entries = state.chunks(9);
 
     for entry in entries {
-        let draw = Draw::new(entry);
+        let entity = Entity::new(entry);
 
-        draw.paint(&mut pixels, width, height);
+        entity.paint(pixels, width, height);
     }
+}
 
-    Uint8ClampedArray::from(&pixels[..])
+#[wasm_bindgen]
+pub fn clear(pixels: &mut [u8], state: &[usize], width: usize, height: usize) {
+    let entries = state.chunks(9);
+
+    for entry in entries {
+        let entity = Entity::new(entry);
+
+        entity.clear(pixels, width, height);
+    }
 }
 
 struct Entry {

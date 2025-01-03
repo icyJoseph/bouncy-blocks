@@ -37,40 +37,47 @@
     </script>
 
     <script type="module">
-      import init, { paint, update } from "./pkg/bouncy_blocks.js";
+      import init, { paint, update, clear } from "./pkg/bouncy_blocks.js";
 
       const canvas = document.getElementById("root");
       const context = canvas.getContext("2d");
 
       init().then(() => {
         loopAnimation(() => {
-          const { width, height } = adjustCanvas(canvas);
+          const { width, height, didChange } = adjustCanvas(canvas);
 
-          pixels.current = paint(state, width, height);
+          if (pixels.current == null || didChange) {
+            pixels.current = new Uint8ClampedArray(width * height * 4);
+          }
 
-          update(state, width, height, gravity.current);
+          paint(pixels.current, state, width, height);
 
           const imageData = new ImageData(pixels.current, width, height);
 
           context.putImageData(imageData, 0, 0);
 
-          pixels.current = null;
+          clear(pixels.current, state, width, height);
+
+          update(state, width, height, gravity.current);
         });
       });
 
       function adjustCanvas(target) {
         const width = target.clientWidth;
         const height = target.clientHeight;
+        let didChange = false;
 
         if (target.width !== width) {
           target.width = width;
+          didChange = true;
         }
 
         if (target.height !== height) {
           target.height = height;
+          didChange = true;
         }
 
-        return { width: target.width, height: target.height };
+        return { width: target.width, height: target.height, didChange };
       }
     </script>
 
