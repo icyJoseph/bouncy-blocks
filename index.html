@@ -138,10 +138,11 @@
         const g = getRandomInt(0, 256);
         const b = getRandomInt(0, 256);
 
-        const id = seen.size;
+        const index = seen.size;
+        const id = index + 1;
         const block = [id, x, y, dx, dy, size, r, g, b];
 
-        state.set(block, id * 9);
+        state.set(block, index * 9);
 
         seen.add(block);
       });

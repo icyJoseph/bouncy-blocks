@@ -105,14 +105,22 @@ struct Block {
 }
 
 impl Block {
-    fn new(state: &[i32]) -> Self {
+    fn new(state: &[i32]) -> Option<Self> {
+        let id = state[0];
+
+        if id == 0 {
+            return None;
+        }
+
         let x = state[1];
         let y = state[2];
         let dx = state[3];
         let dy = state[4];
         let size = state[5];
 
-        Block { x, y, dx, dy, size }
+        let block = Block { x, y, dx, dy, size };
+
+        Some(block)
     }
 
     fn update(&mut self, width: i32, height: i32, gravity: i32) {
@@ -155,10 +163,12 @@ pub fn update(state: &mut [i32], width: i32, height: i32, gravity: i32) {
         let from = i * 9;
         let to = from + 9;
 
-        let mut entry = Block::new(&state[from..to]);
+        let Some(mut block) = Block::new(&state[from..to]) else {
+            return;
+        };
 
-        entry.update(width, height, gravity);
+        block.update(width, height, gravity);
 
-        entry.apply(&mut state[from..to]);
+        block.apply(&mut state[from..to]);
     }
 }
