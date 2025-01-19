@@ -9,22 +9,30 @@
   <body>
     <canvas id="root"></canvas>
 
-    <p class="call-to-action">click to add blocks</p>
+    <div class="call-to-action">
+      <p>click to add blocks</p>
 
+      <p id="mic-state">...</p>
+    </div>
+
+    <div class="fab-announcer">
+      <p id="block-count">0</p>
+    </div>
     <script>
-      const FPS = 60;
-      const fpsTime = 1000 / FPS;
+      function createAnimationLoop(opts = { fps: 60 }) {
+        const fpsTime = 1000 / opts.fps;
 
-      function loopAnimation(callback, prev = 0) {
-        requestAnimationFrame((timestamp) => {
-          if (timestamp - prev < fpsTime) {
-            return loopAnimation(callback, prev);
-          }
+        return function loopAnimation(callback, prev = 0) {
+          requestAnimationFrame((timestamp) => {
+            if (timestamp - prev < fpsTime) {
+              return loopAnimation(callback, prev);
+            }
 
-          callback();
+            callback();
 
-          return loopAnimation(callback, timestamp);
-        });
+            return loopAnimation(callback, timestamp);
+          });
+        };
       }
 
       const gravity = { current: 1 };
@@ -33,7 +41,7 @@
 
       const state = new Int32Array(9 * 500);
 
-      let pixels = { current: null };
+      const pixels = { current: null };
     </script>
 
     <script type="module">
@@ -42,8 +50,10 @@
       const canvas = document.getElementById("root");
       const context = canvas.getContext("2d");
 
+      const animateCanvas = createAnimationLoop({ fps: 60 });
+
       init().then(() => {
-        loopAnimation(() => {
+        animateCanvas(() => {
           const { width, height, didChange } = adjustCanvas(canvas);
 
           if (pixels.current == null || didChange) {
@@ -82,39 +92,43 @@
     </script>
 
     <script type="module">
-      navigator.mediaDevices
-        .getUserMedia({ audio: true, video: false })
-        .then((stream) => {
-          const context = new AudioContext();
-          const analyzer = context.createAnalyser();
+      const micState = document.getElementById("mic-state");
 
-          const source = context.createMediaStreamSource(stream);
-
-          source.connect(analyzer);
-
-          analyzer.fftSize = 256;
-          analyzer.minDecibels = -60;
-
-          const data = new Uint8Array(analyzer.frequencyBinCount);
-
-          loopAnimation(() => {
-            analyzer.getByteFrequencyData(data);
-
-            const accPower = data.reduce((acc, curr) => acc + curr / 255, 0);
-
-            if (accPower > 5) {
-              gravity.current = Math.max(-10, gravity.current - 1);
-            } else if (gravity.current < 1) {
-              gravity.current = Math.min(
-                1,
-                Math.ceil((gravity.current + 1) / 2),
-              );
-            }
-          });
-        })
-        .catch((reason) => {
-          console.log(reason);
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+          video: false,
         });
+
+        micState.textContent = "And scream!";
+
+        const audioContext = new AudioContext();
+        const analyzer = audioContext.createAnalyser();
+
+        const source = audioContext.createMediaStreamSource(stream);
+        source.connect(analyzer);
+
+        analyzer.fftSize = 256;
+        analyzer.minDecibels = -80;
+
+        const data = new Uint8Array(analyzer.frequencyBinCount);
+
+        const audioLoop = createAnimationLoop({ fps: 30 });
+
+        audioLoop(() => {
+          analyzer.getByteFrequencyData(data);
+
+          const accPower = data.reduce((acc, curr) => acc + curr / 255, 0);
+          if (accPower > 5) {
+            gravity.current = Math.max(-10, gravity.current - 1);
+          } else if (gravity.current < 1) {
+            gravity.current = Math.min(1, Math.ceil((gravity.current + 1) / 2));
+          }
+        });
+      } catch (reason) {
+        micState.textContent = "Missing microphone access";
+        console.log(reason);
+      }
     </script>
 
     <script type="module">
@@ -145,6 +159,10 @@
         state.set(block, index * 9);
 
         seen.add(block);
+
+        let counter = document.getElementById("block-count");
+
+        counter.textContent = seen.size;
       });
     </script>
   </body>
